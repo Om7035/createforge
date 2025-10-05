@@ -4,6 +4,9 @@
 
 [![npm version](https://badge.fury.io/js/createforge.svg)](https://www.npmjs.com/package/createforge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/Om7035/createforge/actions/workflows/ci.yml/badge.svg)](https://github.com/Om7035/createforge/actions/workflows/ci.yml)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ## Why Developers Love CreateForge
 
