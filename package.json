@@ -1,0 +1,56 @@
+{
+  "name": "createforge",
+  "version": "0.1.0",
+  "description": "Ship full-stack apps, not scaffolds — from idea to deployed product in minutes",
+  "type": "module",
+  "bin": {
+    "createforge": "./dist/cli.js",
+    "forge": "./dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Om7035/createforge.git"
+  },
+  "homepage": "https://github.com/Om7035/createforge#readme",
+  "bugs": {
+    "url": "https://github.com/Om7035/createforge/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "scaffold",
+    "generator",
+    "template",
+    "cli",
+    "full-stack",
+    "nextjs",
+    "saas"
+  ],
+  "author": "Om7035",
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "@types/conf": "^2.1.0",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "conf": "^12.0.0",
+    "degit": "^2.8.4",
+    "execa": "^8.0.1",
+    "node-fetch": "^3.3.2",
+    "open": "^10.0.3",
+    "ora": "^7.0.1",
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
