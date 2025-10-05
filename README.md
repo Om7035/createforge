@@ -239,14 +239,28 @@ We design every feature to trigger one or more of these emotions:
 
 ## Installation
 
-```bash
-# Use directly with npx (recommended)
-npx createforge
+### Option 1: Use with npx (No Installation Required)
 
-# Or install globally
-npm install -g createforge
-forge create my-app
+```bash
+npx createforge
 ```
+
+This runs the latest version directly - perfect for one-time use or trying it out!
+
+### Option 2: Install Globally
+
+```bash
+npm install -g createforge
+```
+
+After installation, use either command:
+```bash
+forge create my-app
+# or
+createforge create my-app
+```
+
+📖 **[Full Installation Guide](INSTALL.md)** - Includes troubleshooting and developer setup
 
 ## Requirements
 
