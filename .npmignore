@@ -1,0 +1,44 @@
+# Source files
+src/
+*.test.ts
+*.spec.ts
+
+# Config files
+tsconfig.json
+vitest.config.ts
+.github/
+.vscode/
+.idea/
+
+# Documentation (keep README, LICENSE)
+CONTRIBUTING.md
+DEVELOPMENT.md
+METRICS.md
+PITCH.md
+QUICKSTART.md
+SUMMARY.md
+PROJECT_STATUS.md
+PUBLISHING.md
+QUICK_PUBLISH.md
+INSTALL.md
+
+# Development files
+demo.sh
+test-cli.js
+node_modules/
+.git/
+.gitignore
+
+# Template tests (templates themselves should be included)
+templates/**/tests/
+templates/**/node_modules/
+templates/**/.next/
+templates/**/dist/
+templates/**/.turbo/
+
+# Logs and temp files
+*.log
+.DS_Store
+.env
+.env.local
+coverage/
