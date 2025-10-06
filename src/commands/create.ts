@@ -19,10 +19,12 @@ interface CreateOptions {
 
 export async function create(projectName?: string, options: CreateOptions = {}) {
   console.clear();
+  ui.banner();
   
   const startTime = Date.now();
   
   // Step 1: Get project name
+  ui.step(1, 8, 'Getting project name');
   if (!projectName) {
     const result = await ui.text({
       message: 'What is your project called?',
@@ -43,6 +45,7 @@ export async function create(projectName?: string, options: CreateOptions = {}) 
   }
   
   // Step 2: Select template
+  ui.step(2, 8, 'Selecting template');
   let templateId = options.template;
   
   if (!templateId) {
@@ -95,6 +98,7 @@ export async function create(projectName?: string, options: CreateOptions = {}) 
   ui.info(`Using ${ui.badge(template.name)}`);
   
   // Step 3: Clone template
+  ui.step(3, 8, 'Cloning template');
   const spinner = ui.spinner();
   spinner.start('Creating your project...');
   
@@ -117,6 +121,7 @@ export async function create(projectName?: string, options: CreateOptions = {}) 
   }
   
   // Step 4: Install dependencies
+  ui.step(4, 8, 'Installing dependencies');
   if (options.install !== false) {
     spinner.start('Installing dependencies...');
     
@@ -134,6 +139,7 @@ export async function create(projectName?: string, options: CreateOptions = {}) 
   }
   
   // Step 5: Initialize git
+  ui.step(5, 8, 'Initializing git repository');
   if (options.git !== false) {
     try {
       await execa('git', ['init'], { cwd: projectName, stdio: 'pipe' });
@@ -146,32 +152,34 @@ export async function create(projectName?: string, options: CreateOptions = {}) 
   }
   
   // Step 6: Update stats
+  ui.step(6, 8, 'Updating project stats');
   updateStats('project_created');
   addRecentTemplate(template.id);
   
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   
   // Step 7: Success celebration!
-  console.log('');
-  ui.confetti();
+  ui.step(7, 8, 'Celebrating success! 🎉');
+  ui.bigConfetti();
   
   ui.box('🚀 Your app is ready!', [
-    `Created in ${elapsed}s — Time to first success: ${elapsed}s`,
+    `${ui.successBadge('SUCCESS')} Created in ${elapsed}s — Time to first success: ${elapsed}s`,
     '',
-    `Next steps:`,
-    `  cd ${projectName}`,
-    `  npm run dev`,
+    `${ui.bold('Next steps:')}`,
+    `  ${ui.command(`cd ${projectName}`)}`,
+    `  ${ui.command('npm run dev')}`,
     '',
     template.hasSeedData ? '💡 Demo data is already seeded — check it out!' : '',
     template.hasTests ? '✓ Tests included — run `npm test`' : '',
   ].filter(Boolean));
   
-  console.log('');
+  ui.spacer();
   ui.info(`Share your build: ${ui.link('https://forge.dev/showcase')}`);
-  ui.info(`Add plugins: ${ui.code(`forge add stripe`)}`);
-  ui.info(`Deploy now: ${ui.code(`forge init --deploy vercel`)}`);
+  ui.info(`Add plugins: ${ui.command('forge add stripe')}`);
+  ui.info(`Deploy now: ${ui.command('forge init --deploy vercel')}`);
   
-  // Step 8: Open in Forge Live?
+  // Step 8: Optional enhancements
+  ui.step(8, 8, 'Optional enhancements');
   if (options.live || template.livePreviewUrl) {
     console.log('');
     const shouldOpenLive = await ui.confirm({

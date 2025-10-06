@@ -7,6 +7,7 @@ import { addPlugin } from './commands/add.js';
 import { health } from './commands/health.js';
 import { init } from './commands/init.js';
 import { showProfile } from './commands/profile.js';
+import { showWelcome, showQuickStart, showExamples } from './commands/help.js';
 import { ui } from './utils/ui.js';
 
 const program = new Command();
@@ -16,7 +17,7 @@ program
   .description('Ship full-stack apps, not scaffolds — from idea to deployed product in minutes')
   .version('0.1.0')
   .hook('preAction', () => {
-    ui.intro('CreateForge — Ship full-stack apps in minutes');
+    ui.banner();
   });
 
 program
@@ -73,23 +74,48 @@ program
   .command('plugins')
   .description('List available plugins')
   .action(() => {
-    ui.info('Available plugins: stripe, clerk, supabase, openai, analytics');
-    ui.info('Use `forge add <plugin>` to install any plugin');
+    ui.intro('Available Plugins');
+    
+    ui.table(
+      ['Plugin', 'Description', 'Use Case'],
+      [
+        ['stripe', 'Accept payments with Stripe', 'E-commerce, SaaS billing'],
+        ['clerk', 'User authentication', 'Login, signup, user management'],
+        ['supabase', 'Database and auth', 'Backend as a service'],
+        ['openai', 'AI capabilities', 'Chat, completion, embeddings'],
+        ['analytics', 'Track user behavior', 'Usage analytics'],
+      ]
+    );
+    
+    ui.info(`Use ${ui.command('forge add <plugin>')} to install any plugin`);
+    ui.outro('Build something amazing! 🚀');
   });
 
 program
   .command('templates')
   .description('List available templates')
   .action(() => {
-    ui.info('Available templates: nextjs-saas, ai-rag, nextjs-blog, ecommerce');
-    ui.info('Use `forge create --template <template>` to create a project with a specific template');
+    ui.intro('Available Templates');
+    
+    ui.table(
+      ['Template', 'Description', 'Stack'],
+      [
+        ['nextjs-saas', 'Production SaaS with auth & payments', 'Next.js + TypeScript + Tailwind'],
+        ['ai-rag', 'RAG chat with vector search', 'Next.js + OpenAI + Pinecone'],
+        ['nextjs-blog', 'Blog with MDX support', 'Next.js + MDX + Tailwind'],
+        ['ecommerce', 'Full store with cart & checkout', 'Next.js + Stripe + Tailwind'],
+      ]
+    );
+    
+    ui.info(`Use ${ui.command('forge create --template <name>')} to create a project`);
+    ui.outro('Happy building! ⚡');
   });
 
 program
   .command('love')
   .description('Show some developer love')
   .action(() => {
-    ui.confetti();
+    ui.bigConfetti();
     ui.box('❤️ Developer Love', [
       'Thanks for using CreateForge!',
       '',
@@ -103,4 +129,24 @@ program
     ]);
   });
 
-program.parse();
+program
+  .command('welcome')
+  .description('Show welcome guide')
+  .action(showWelcome);
+
+program
+  .command('quickstart')
+  .description('Show quick start guide')
+  .action(showQuickStart);
+
+program
+  .command('examples')
+  .description('Show example workflows')
+  .action(showExamples);
+
+// Show welcome if no command provided
+if (process.argv.length === 2) {
+  showWelcome();
+} else {
+  program.parse();
+}
