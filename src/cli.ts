@@ -8,6 +8,8 @@ import { health } from './commands/health.js';
 import { init } from './commands/init.js';
 import { showProfile } from './commands/profile.js';
 import { showWelcome, showQuickStart, showExamples } from './commands/help.js';
+import { templates, getFeaturedTemplates, getTemplatesByCategory, getTemplatesByTag, searchTemplates, Template } from './utils/templates.js';
+import { builtinPlugins, ForgePlugin } from './plugins/index.js';
 import { ui } from './utils/ui.js';
 
 const program = new Command();
@@ -73,41 +75,197 @@ program
 program
   .command('plugins')
   .description('List available plugins')
-  .action(() => {
-    ui.intro('Available Plugins');
+  .option('-c, --category <category>', 'Filter by category (payment, auth, database, ai, etc.)')
+  .option('-s, --search <query>', 'Search plugins')
+  .action((options) => {
+    let title = 'Available Plugins';
+    let plugins: ForgePlugin[] = Object.values(builtinPlugins);
     
-    ui.table(
-      ['Plugin', 'Description', 'Use Case'],
-      [
-        ['stripe', 'Accept payments with Stripe', 'E-commerce, SaaS billing'],
-        ['clerk', 'User authentication', 'Login, signup, user management'],
-        ['supabase', 'Database and auth', 'Backend as a service'],
-        ['openai', 'AI capabilities', 'Chat, completion, embeddings'],
-        ['analytics', 'Track user behavior', 'Usage analytics'],
-      ]
+    if (options.search) {
+      const query = options.search.toLowerCase();
+      plugins = plugins.filter((p: ForgePlugin) => 
+        p.name.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        p.id.includes(query)
+      );
+      title = `Search results for "${options.search}"`;
+    }
+    
+    ui.intro(title);
+    
+    if (plugins.length === 0) {
+      ui.warning('No plugins found matching your criteria');
+      ui.info('Try: forge plugins or forge plugins --search auth');
+      return;
+    }
+    
+    // Group plugins by category
+    const categories = {
+      '💳 Payment Processing': plugins.filter((p: ForgePlugin) => ['stripe', 'paypal'].includes(p.id)),
+      '🔐 Authentication': plugins.filter((p: ForgePlugin) => ['clerk', 'nextauth', 'auth0'].includes(p.id)),
+      '🗄️ Database & Backend': plugins.filter((p: ForgePlugin) => ['supabase', 'prisma', 'mongodb', 'firebase'].includes(p.id)),
+      '🤖 AI & Machine Learning': plugins.filter((p: ForgePlugin) => ['openai', 'anthropic', 'pinecone'].includes(p.id)),
+      '📧 Communication': plugins.filter((p: ForgePlugin) => ['resend', 'sendgrid', 'twilio'].includes(p.id)),
+      '📁 File Storage': plugins.filter((p: ForgePlugin) => ['uploadthing', 'cloudinary'].includes(p.id)),
+      '📊 Analytics & Monitoring': plugins.filter((p: ForgePlugin) => ['analytics', 'posthog', 'sentry'].includes(p.id)),
+      '🔄 API & Data': plugins.filter((p: ForgePlugin) => ['trpc', 'tanstack', 'apollo'].includes(p.id)),
+      '🎨 UI & Styling': plugins.filter((p: ForgePlugin) => ['shadcn', 'mantine', 'chakra'].includes(p.id)),
+      '🏪 State Management': plugins.filter((p: ForgePlugin) => ['zustand', 'redux'].includes(p.id)),
+      '🧪 Testing': plugins.filter((p: ForgePlugin) => ['playwright', 'cypress'].includes(p.id)),
+    };
+    
+    // Show popular plugins first
+    const popular = plugins.filter((p: ForgePlugin) => 
+      ['stripe', 'clerk', 'supabase', 'openai', 'prisma', 'nextauth', 'trpc', 'shadcn'].includes(p.id)
     );
     
+    if (popular.length > 0 && !options.search) {
+      ui.spacer();
+      ui.info(ui.bold('⭐ Popular Plugins'));
+      ui.table(
+        ['Plugin', 'Description', 'Category'],
+        popular.map((p: ForgePlugin) => [
+          p.id,
+          p.description,
+          getCategoryForPlugin(p.id)
+        ])
+      );
+    }
+    
+    if (!options.search) {
+      Object.entries(categories).forEach(([category, categoryPlugins]) => {
+        if (categoryPlugins.length > 0) {
+          ui.spacer();
+          ui.info(ui.bold(category));
+          ui.table(
+            ['Plugin', 'Description', 'Packages'],
+            categoryPlugins.map((p: ForgePlugin) => [
+              p.id,
+              p.description,
+              p.packages.slice(0, 2).join(', ') + (p.packages.length > 2 ? '...' : '')
+            ])
+          );
+        }
+      });
+    } else {
+      ui.spacer();
+      ui.table(
+        ['Plugin', 'Description', 'Category'],
+        plugins.map((p: ForgePlugin) => [
+          p.id,
+          p.description,
+          getCategoryForPlugin(p.id)
+        ])
+      );
+    }
+    
+    ui.spacer();
+    ui.info(`📊 Total: ${plugins.length} plugins available`);
     ui.info(`Use ${ui.command('forge add <plugin>')} to install any plugin`);
+    ui.info(`Search: ${ui.command('forge plugins --search auth')} or ${ui.command('forge plugins --search payment')}`);
     ui.outro('Build something amazing! 🚀');
   });
+
+function getCategoryForPlugin(pluginId: string): string {
+  const categoryMap: Record<string, string> = {
+    'stripe': 'Payment', 'paypal': 'Payment',
+    'clerk': 'Auth', 'nextauth': 'Auth', 'auth0': 'Auth',
+    'supabase': 'Database', 'prisma': 'Database', 'mongodb': 'Database', 'firebase': 'Database',
+    'openai': 'AI', 'anthropic': 'AI', 'pinecone': 'AI',
+    'resend': 'Email', 'sendgrid': 'Email', 'twilio': 'SMS',
+    'uploadthing': 'Storage', 'cloudinary': 'Storage',
+    'analytics': 'Analytics', 'posthog': 'Analytics', 'sentry': 'Monitoring',
+    'trpc': 'API', 'tanstack': 'Data', 'apollo': 'GraphQL',
+    'shadcn': 'UI', 'mantine': 'UI', 'chakra': 'UI',
+    'zustand': 'State', 'redux': 'State',
+    'playwright': 'Testing', 'cypress': 'Testing',
+  };
+  return categoryMap[pluginId] || 'Other';
+}
 
 program
   .command('templates')
   .description('List available templates')
-  .action(() => {
-    ui.intro('Available Templates');
+  .option('-c, --category <category>', 'Filter by category (full-stack, frontend, backend, mobile, etc.)')
+  .option('-t, --tag <tag>', 'Filter by technology tag')
+  .option('-s, --search <query>', 'Search templates')
+  .option('-f, --featured', 'Show only featured templates')
+  .action((options) => {
+    let filteredTemplates: Template[] = templates;
+    let title = 'All Templates';
     
-    ui.table(
-      ['Template', 'Description', 'Stack'],
-      [
-        ['nextjs-saas', 'Production SaaS with auth & payments', 'Next.js + TypeScript + Tailwind'],
-        ['ai-rag', 'RAG chat with vector search', 'Next.js + OpenAI + Pinecone'],
-        ['nextjs-blog', 'Blog with MDX support', 'Next.js + MDX + Tailwind'],
-        ['ecommerce', 'Full store with cart & checkout', 'Next.js + Stripe + Tailwind'],
-      ]
-    );
+    if (options.featured) {
+      filteredTemplates = getFeaturedTemplates();
+      title = 'Featured Templates';
+    } else if (options.category) {
+      filteredTemplates = getTemplatesByCategory(options.category);
+      title = `${options.category.charAt(0).toUpperCase() + options.category.slice(1)} Templates`;
+    } else if (options.tag) {
+      filteredTemplates = getTemplatesByTag(options.tag);
+      title = `Templates with ${options.tag}`;
+    } else if (options.search) {
+      filteredTemplates = searchTemplates(options.search);
+      title = `Search results for "${options.search}"`;
+    }
     
+    ui.intro(title);
+    
+    if (filteredTemplates.length === 0) {
+      ui.warning('No templates found matching your criteria');
+      ui.info('Try: forge templates --featured or forge templates --category full-stack');
+      return;
+    }
+    
+    // Show featured templates first
+    const featured = filteredTemplates.filter((t: Template) => t.featured);
+    const regular = filteredTemplates.filter((t: Template) => !t.featured);
+    
+    if (featured.length > 0) {
+      ui.spacer();
+      ui.info(ui.bold('⭐ Featured Templates'));
+      ui.table(
+        ['Template', 'Description', 'Stack'],
+        featured.map((t: Template) => [
+          t.id + (t.battleTested ? ' ⚔️' : ''),
+          t.description,
+          t.tags.slice(0, 3).join(', ')
+        ])
+      );
+    }
+    
+    if (regular.length > 0 && !options.featured) {
+      ui.spacer();
+      ui.info(ui.bold('📚 All Templates'));
+      
+      // Group by category for better organization
+      const categories = {
+        'Full-Stack': regular.filter((t: Template) => ['mern-stack', 'mean-stack', 'mevn-stack', 't3-stack', 'remix-app', 'sveltekit-app'].includes(t.id)),
+        'Backend APIs': regular.filter((t: Template) => ['express-api', 'fastify-api', 'graphql-api', 'trpc-api'].includes(t.id)),
+        'Mobile & Desktop': regular.filter((t: Template) => ['react-native', 'flutter-app', 'electron-app'].includes(t.id)),
+        'Specialized': regular.filter((t: Template) => ['nextjs-blog', 'portfolio', 'dashboard', 'landing-page'].includes(t.id)),
+        'Cloud & Microservices': regular.filter((t: Template) => ['microservices', 'serverless', 'edge-functions'].includes(t.id)),
+      };
+      
+      Object.entries(categories).forEach(([category, templates]) => {
+        if (templates.length > 0) {
+          ui.spacer();
+          ui.info(ui.dim(`${category}:`));
+          ui.table(
+            ['Template', 'Description', 'Stack'],
+            templates.map((t: Template) => [
+              t.id + (t.battleTested ? ' ⚔️' : ''),
+              t.description,
+              t.tags.slice(0, 3).join(', ')
+            ])
+          );
+        }
+      });
+    }
+    
+    ui.spacer();
+    ui.info(`📊 Total: ${filteredTemplates.length} templates available`);
     ui.info(`Use ${ui.command('forge create --template <name>')} to create a project`);
+    ui.info(`Filter: ${ui.command('forge templates --category full-stack')} or ${ui.command('forge templates --featured')}`);
     ui.outro('Happy building! ⚡');
   });
 
