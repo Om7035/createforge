@@ -197,39 +197,18 @@ export async function create(projectName?: string, options: CreateOptions = {}) 
     }
   }
   
-  // Step 9: Offer to create GitHub repo
+  // Optional: Offer to open the project
   console.log('');
-  const shouldInitGitHub = await ui.confirm({
-    message: 'Set up GitHub repo + CI/CD now?',
-    initialValue: false,
+  const shouldOpen = await ui.confirm({
+    message: 'Open project in VS Code?',
+    initialValue: true,
   });
   
-  if (!p.isCancel(shouldInitGitHub) && shouldInitGitHub) {
-    ui.info('Run `forge init` to set up GitHub integration');
-  }
-  
-  // Step 10: Offer to add a plugin
-  console.log('');
-  const shouldAddPlugin = await ui.confirm({
-    message: 'Add a plugin now?',
-    initialValue: false,
-  });
-  
-  if (!p.isCancel(shouldAddPlugin) && shouldAddPlugin) {
-    const plugin = await ui.select({
-      message: 'Choose a plugin',
-      options: [
-        { value: 'stripe', label: '💳 Stripe Payments', hint: 'Accept payments with Stripe' },
-        { value: 'clerk', label: '🔐 Clerk Auth', hint: 'User authentication' },
-        { value: 'supabase', label: '📊 Supabase', hint: 'Database and auth' },
-        { value: 'openai', label: '🤖 OpenAI', hint: 'AI capabilities' },
-        { value: 'analytics', label: '📈 Analytics', hint: 'Track user behavior' },
-        { value: 'none', label: '→ Skip for now', hint: 'Add plugins later' },
-      ],
-    });
-    
-    if (!p.isCancel(plugin) && plugin !== 'none') {
-      await addPlugin(plugin as string);
+  if (!p.isCancel(shouldOpen) && shouldOpen) {
+    try {
+      await execa('code', [projectName], { stdio: 'inherit' });
+    } catch {
+      ui.info(`Project created in: ${projectName}`);
     }
   }
   

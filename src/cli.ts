@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { create } from './commands/create.js';
-import { live } from './commands/live.js';
+import { create } from './commands/create-realistic.js';
 import { addPlugin } from './commands/add.js';
 import { health } from './commands/health.js';
-import { init } from './commands/init.js';
+import { upgrade } from './commands/upgrade.js';
 import { showProfile } from './commands/profile.js';
 import { showWelcome, showQuickStart, showExamples } from './commands/help.js';
 import { templates, getFeaturedTemplates, getTemplatesByCategory, getTemplatesByTag, searchTemplates, Template } from './utils/templates.js';
@@ -16,7 +15,7 @@ const program = new Command();
 
 program
   .name('createforge')
-  .description('Ship full-stack apps, not scaffolds — from idea to deployed product in minutes')
+  .description('Create working full-stack apps instantly — no tokens, no setup, no BS')
   .version('0.1.0')
   .hook('preAction', () => {
     ui.banner();
@@ -24,37 +23,23 @@ program
 
 program
   .command('create')
-  .description('Create a new app from a template')
+  .description('Create a new app that works instantly')
   .argument('[project-name]', 'Name of your project')
-  .option('-t, --template <template>', 'Template to use (nextjs-saas, ai-rag, etc.)')
-  .option('-l, --live', 'Open in Forge Live browser environment')
+  .option('-t, --template <template>', 'Template to use (default: nextjs-saas)')
   .option('--no-install', 'Skip dependency installation')
-  .option('--no-git', 'Skip git initialization')
   .action(create);
 
 program
-  .command('live')
-  .description('Open current project in Forge Live browser environment')
-  .argument('[path]', 'Path to project', '.')
-  .action(live);
-
-program
-  .command('add')
-  .description('Add a plugin to your project')
-  .argument('<plugin>', 'Plugin name (stripe, clerk, supabase, etc.)')
-  .action(addPlugin);
+  .command('upgrade')
+  .description('Upgrade from local services to real ones')
+  .argument('[service]', 'Service to upgrade (auth, payments, database, email)')
+  .option('--provider <provider>', 'Specific provider to upgrade to')
+  .action(upgrade);
 
 program
   .command('health')
-  .description('Check project health and get upgrade recommendations')
-  .option('--fix', 'Automatically create PR for upgrades')
+  .description('Check project health')
   .action(health);
-
-program
-  .command('init')
-  .description('Initialize GitHub repo, actions, and deployment')
-  .option('--deploy <platform>', 'Deploy platform (vercel, netlify, railway)', 'vercel')
-  .action(init);
 
 program
   .command('profile')

@@ -1,7 +1,7 @@
 {
   "name": "createforge",
   "version": "0.1.0",
-  "description": "Ship full-stack apps, not scaffolds — from idea to deployed product in minutes",
+  "description": "Create working full-stack apps instantly — no tokens, no setup, no BS",
   "type": "module",
   "bin": {
     "createforge": "./dist/cli.js",

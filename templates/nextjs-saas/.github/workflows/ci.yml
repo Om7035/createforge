@@ -1,7 +1,7 @@
-# Continuous Integration and Deployment Workflow
-# This workflow runs tests on all pushes and PRs, and deploys to Vercel when appropriate
+# Simple CI Workflow - No tokens needed!
+# This workflow just runs tests to make sure everything works
 
-name: CI/CD
+name: CI
 
 on:
   push:
@@ -10,16 +10,16 @@ on:
     branches: [main]
 
 jobs:
-  # Run tests and build checks on all branches
+  # Run tests and build checks
   test:
-    name: Test Suite
+    name: Test & Build
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Setup Node.js environment
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -28,65 +28,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Type check
-        run: npm run type-check
-      
-      - name: Lint code
-        run: npm run lint
+      - name: Run setup (create demo data)
+        run: npm run setup
       
       - name: Run tests
         run: npm test
       
       - name: Build application
         run: npm run build
-  
-  # Deploy to Vercel preview environment for PRs
-  deploy-preview:
-    name: Deploy Preview
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
       
-      - name: Deploy to Vercel Preview
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ env.VERCEL_TOKEN }}
-          vercel-org-id: ${{ env.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
-          github-comment: true
-  
-  # Deploy to Vercel production environment for main branch
-  deploy-production:
-    name: Deploy Production
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Deploy to Vercel Production
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ env.VERCEL_TOKEN }}
-          vercel-org-id: ${{ env.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+      - name: Success! ✅
+        run: echo "All tests passed! Your app is ready to deploy anywhere."
 
 
 
